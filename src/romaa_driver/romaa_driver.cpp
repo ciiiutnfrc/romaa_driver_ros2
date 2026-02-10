@@ -38,13 +38,18 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
         "cmd_vel", rclcpp::SensorDataQoS(),
         std::bind(&RoMAADriver::cmdVelCb, this, _1));
 
-    // Set odometry message constant fields
+    // Set odometry and TF messages constant fields
     odom_msg.header.frame_id = odom_frame;
     odom_msg.child_frame_id = base_frame;
+    odom_tf.header.frame_id = odom_frame;
+    odom_tf.child_frame_id = base_frame;
+
+    // Transform broadcaster
+    tf_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
     // Publisher timer
     pub_timer = create_wall_timer(std::chrono::duration<double>(1.0 / frequency),
-        std::bind(&RoMAADriver::pubOdometryCb, this));
+        std::bind(&RoMAADriver::pubOdometryTFCb, this));
 }
 
 RoMAADriver::~RoMAADriver()
@@ -69,7 +74,7 @@ RoMAADriver::cmdVelCb(geometry_msgs::msg::Twist::UniquePtr msg)
 }
 
 void
-RoMAADriver::pubOdometryCb()
+RoMAADriver::pubOdometryTFCb()
 {
     // Time
     auto current_time = now();
@@ -93,8 +98,17 @@ RoMAADriver::pubOdometryCb()
     odom_msg.twist.twist.linear.x = v;
     odom_msg.twist.twist.angular.z = w;
 
+    // TF
+    odom_tf.header.stamp = current_time;
+    odom_tf.transform.translation.x = odom_msg.pose.pose.position.x;
+    odom_tf.transform.translation.y = odom_msg.pose.pose.position.y;
+    odom_tf.transform.rotation = odom_msg.pose.pose.orientation;
+
     // Publish odometry message
     odom_pub->publish(odom_msg);
+
+    // Broadcast TF
+    tf_broadcaster->sendTransform(odom_tf);
 }
 
 } // namespace 'romaa_driver'

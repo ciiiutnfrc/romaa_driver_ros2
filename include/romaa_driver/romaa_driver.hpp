@@ -11,6 +11,7 @@
 
 // TF2 library
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include "tf2_ros/transform_broadcaster.hpp"
 
 // RoMAA communication class
 #include "romaa_comm/romaa_comm.h"
@@ -42,12 +43,16 @@ class RoMAADriver : public rclcpp::Node
         rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub;
         void cmdVelCb(geometry_msgs::msg::Twist::UniquePtr );
 
+        // TF2 variables
+        std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster;
+        geometry_msgs::msg::TransformStamped odom_tf;
+
         // Messages
         nav_msgs::msg::Odometry odom_msg;
 
         // Timer
         rclcpp::TimerBase::SharedPtr pub_timer;
-        void pubOdometryCb();
+        void pubOdometryTFCb();
 };
 
 } // namespace 'romaa_driver'
