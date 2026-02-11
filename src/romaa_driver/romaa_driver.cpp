@@ -30,6 +30,9 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
         return;
     }
 
+   comm->enable_motor();
+   RCLCPP_INFO(get_logger(), "Enable motors.");
+
     // Create publisher
     odom_pub = create_publisher<nav_msgs::msg::Odometry>("odom", 10);
 
