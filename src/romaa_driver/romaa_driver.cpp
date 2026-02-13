@@ -9,11 +9,23 @@ using std::placeholders::_2;
 
 RoMAADriver::RoMAADriver() : Node("romaa_driver")
 {
-    frequency = 10.0;
-    port = "/dev/ttyUSB0";
-    baudrate = 115200;
-    odom_frame = "odom";
-    base_frame = "base_link";
+    // Declare node paremeters
+    declare_parameter<double>("frequency", 10.0);
+    declare_parameter<std::string>("port", "/dev/ttyUSB0");
+    declare_parameter<int>("baudrate", 115200);
+    declare_parameter<std::string>("odom_frame", "odom");
+    declare_parameter<std::string>("base_frame", "base_link");
+    declare_parameter<bool>("enable_motor", false);
+
+    // Reading parameters
+    frequency = get_parameter("frequency").as_double();
+    port = get_parameter("port").as_string();
+    baudrate = get_parameter("baudrate").as_int();
+    odom_frame = get_parameter("odom_frame").as_string();
+    base_frame = get_parameter("base_frame").as_string();
+    enable_motor = get_parameter("enable_motor").as_bool();
+
+    RCLCPP_INFO(get_logger(), "Driver node parameters ready.");
 
     // Create communication object
     RCLCPP_INFO(get_logger(), "Opening RoMAA communication port in %s at %d...",
@@ -30,8 +42,17 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
         return;
     }
 
-   comm->enable_motor();
-   RCLCPP_INFO(get_logger(), "Enable motors.");
+    // Enable/disable motors
+    if(enable_motor == true)
+    {
+        comm->enable_motor();
+        RCLCPP_INFO(get_logger(), "Enable motors.");
+    }
+    else
+    {
+        comm->disable_motor();
+        RCLCPP_INFO(get_logger(), "Disable motors.");
+    }
 
     // Create publisher
     odom_pub = create_publisher<nav_msgs::msg::Odometry>("odom", 10);

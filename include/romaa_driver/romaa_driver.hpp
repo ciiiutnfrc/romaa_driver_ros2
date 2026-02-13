@@ -30,6 +30,7 @@ class RoMAADriver : public rclcpp::Node
         std::string port;                   // Serial port name
         int baudrate;                       // Serial port baudrate
         std::string odom_frame, base_frame; // TF frame names
+        bool enable_motor;
 
         // Node variables
         romaa_comm *comm;
