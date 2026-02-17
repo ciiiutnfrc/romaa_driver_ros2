@@ -16,6 +16,7 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     declare_parameter<std::string>("odom_frame", "odom");
     declare_parameter<std::string>("base_frame", "base_link");
     declare_parameter<bool>("enable_motor", false);
+    declare_parameter<bool>("reset_odom", false);
 
     // Reading parameters
     frequency = get_parameter("frequency").as_double();
@@ -24,6 +25,7 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     odom_frame = get_parameter("odom_frame").as_string();
     base_frame = get_parameter("base_frame").as_string();
     enable_motor = get_parameter("enable_motor").as_bool();
+    reset_odom = get_parameter("reset_odom").as_bool();
 
     RCLCPP_INFO(get_logger(), "Driver node parameters ready.");
 
@@ -52,6 +54,13 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     {
         comm->disable_motor();
         RCLCPP_INFO(get_logger(), "Disable motors.");
+    }
+
+    // Reset odometry
+    if(reset_odom == true)
+    {
+        comm->reset_odometry();
+        RCLCPP_INFO(get_logger(), "Reset odometry.");
     }
 
     // Create publisher
