@@ -29,6 +29,10 @@ def generate_launch_description():
         'enable_motor', default_value='False',
         description='Enable/disable motors at node startup')
 
+    reset_odom_arg = DeclareLaunchArgument(
+        'reset_odom', default_value='False',
+        description='Reset odometry at node startup')
+
     romaa_driver_node = Node(
         package = 'romaa_driver',
         name = 'romaa_driver',
@@ -39,10 +43,10 @@ def generate_launch_description():
             {"baudrate": LaunchConfiguration('baudrate')},
             {"odom_frame": LaunchConfiguration('odom_frame')},
             {"base_frame": LaunchConfiguration('base_frame')},
-            {"enable_motor": LaunchConfiguration('enable_motor')}
+            {"enable_motor": LaunchConfiguration('enable_motor')},
+            {"reset_odom": LaunchConfiguration('reset_odom')}
         ],
         output="screen"
-
     )
 
     return LaunchDescription([
@@ -52,5 +56,6 @@ def generate_launch_description():
         odom_frame_arg,
         base_frame_arg,
         enable_motor_arg,
+        reset_odom_arg,
         romaa_driver_node
     ])
