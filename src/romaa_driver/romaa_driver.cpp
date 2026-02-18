@@ -80,6 +80,14 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     // Transform broadcaster
     tf_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
+    // Service servers
+    reset_srv = create_service<std_srvs::srv::Empty>("reset",
+        std::bind(&RoMAADriver::resetSrvCb, this, _1, _2));
+    reset_odom_srv = create_service<std_srvs::srv::Empty>("reset_odometry",
+        std::bind(&RoMAADriver::resetOdometrySrvCb, this, _1, _2));
+    motor_srv = create_service<std_srvs::srv::SetBool>("enable_motor",
+        std::bind(&RoMAADriver::enableMotorSrvCb, this, _1, _2));
+
     // Publisher timer
     pub_timer = create_wall_timer(std::chrono::duration<double>(1.0 / frequency),
         std::bind(&RoMAADriver::pubOdometryTFCb, this));
@@ -99,15 +107,13 @@ RoMAADriver::~RoMAADriver()
     delete comm;
 }
 
-void
-RoMAADriver::cmdVelCb(geometry_msgs::msg::Twist::UniquePtr msg)
+void RoMAADriver::cmdVelCb(geometry_msgs::msg::Twist::UniquePtr msg)
 {
     RCLCPP_INFO(get_logger(), "v: %.2f, w: %.2f", msg->linear.x, msg->angular.z);
     comm->set_speed(msg->linear.x, msg->angular.z);
 }
 
-void
-RoMAADriver::pubOdometryTFCb()
+void RoMAADriver::pubOdometryTFCb()
 {
     // Time
     auto current_time = now();
@@ -142,6 +148,46 @@ RoMAADriver::pubOdometryTFCb()
 
     // Broadcast TF
     tf_broadcaster->sendTransform(odom_tf);
+}
+
+// Service callback
+void RoMAADriver::resetSrvCb(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+    std::shared_ptr<std_srvs::srv::Empty::Response> response)
+{
+    (void)request;
+    (void)response;
+    RCLCPP_INFO(get_logger(), "Reset embedded controller.");
+    comm->reset();
+}
+
+// Service callback
+void RoMAADriver::resetOdometrySrvCb(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+    std::shared_ptr<std_srvs::srv::Empty::Response> response)
+{
+    (void)request;
+    (void)response;
+    RCLCPP_INFO(get_logger(), "Reset odometry.");
+    comm->reset_odometry();
+}
+
+// Service callback
+void RoMAADriver::enableMotorSrvCb(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+    std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+{
+    if(request->data == true)
+    {
+        RCLCPP_INFO(get_logger(), "Enable motor.");
+        comm->enable_motor();
+        response->success = true;
+        response->message = "Motor enabled.";
+    }
+    else
+    {
+        RCLCPP_INFO(get_logger(), "Disable motor.");
+        comm->disable_motor();
+        response->success = true;
+        response->message = "Motor disabled.";
+    }
 }
 
 } // namespace 'romaa_driver'
