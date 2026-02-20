@@ -22,6 +22,9 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     declare_parameter<float>("linear_pid.kp", 1800.0);
     declare_parameter<float>("linear_pid.ki", 100.0);
     declare_parameter<float>("linear_pid.kd", 10.0);
+    declare_parameter<float>("angular_pid.kp", 1500.0);
+    declare_parameter<float>("angular_pid.ki", 50.0);
+    declare_parameter<float>("angular_pid.kd", 20.0);
 
     // Reading parameters
     frequency = get_parameter("frequency").as_double();
@@ -36,6 +39,9 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     v_pid_kp = static_cast<float>(get_parameter("linear_pid.kp").as_double());
     v_pid_ki = static_cast<float>(get_parameter("linear_pid.ki").as_double());
     v_pid_kd = static_cast<float>(get_parameter("linear_pid.kd").as_double());
+    w_pid_kp = static_cast<float>(get_parameter("angular_pid.kp").as_double());
+    w_pid_ki = static_cast<float>(get_parameter("angular_pid.ki").as_double());
+    w_pid_kd = static_cast<float>(get_parameter("angular_pid.kd").as_double());
 
     RCLCPP_INFO(get_logger(), "Driver node parameters ready.");
 
@@ -387,6 +393,92 @@ rcl_interfaces::msg::SetParametersResult RoMAADriver::parametersCb(
             }
         }
 
+        // Parameter: angular_pid.kp
+        if( (param.get_name() == "angular_pid.kp" ) &&
+            (param.get_type() == rclcpp::PARAMETER_DOUBLE) )
+        {
+            float new_w_pid_kp = param.get_value<float>();
+            if(new_w_pid_kp < 0)
+            {
+                result.successful = false;
+                result.reason = "'angular_pid.kp' cannot be negative!";
+            }
+            else
+            {
+                RCLCPP_INFO(get_logger(), "Setting angular PID parameters.");
+                comm->set_w_pid(new_w_pid_kp, w_pid_ki, w_pid_kd);
+                if( comm->get_w_pid(w_pid_kp, w_pid_ki, w_pid_kd) == -1 )
+                    result.reason = "Unable to read angular PID parameters.";
+                else
+                {
+                    if(new_w_pid_kp != w_pid_kp)
+                        result.reason = "'angular_pid.kp' could not be set!";
+                    else
+                    {
+                        result.successful = true;
+                        result.reason = "'angular_pid.kp' set to %s" + param.value_to_string();
+                    }
+                }
+            }
+        }
+
+        // Parameter: angular_pid.ki
+        if( (param.get_name() == "angular_pid.ki" ) &&
+            (param.get_type() == rclcpp::PARAMETER_DOUBLE) )
+        {
+            float new_w_pid_ki = param.get_value<float>();
+            if(new_w_pid_ki < 0)
+            {
+                result.successful = false;
+                result.reason = "'angular_pid.ki' cannot be negative!";
+            }
+            else
+            {
+                RCLCPP_INFO(get_logger(), "Setting angular PID parameters.");
+                comm->set_w_pid(w_pid_kp, new_w_pid_ki, w_pid_kd);
+                if( comm->get_w_pid(w_pid_kp, w_pid_ki, w_pid_kd) == -1 )
+                    result.reason = "Unable to read angular PID parameters.";
+                else
+                {
+                    if(new_w_pid_ki != w_pid_ki)
+                        result.reason = "'angular_pid.ki' could not be set!";
+                    else
+                    {
+                        result.successful = true;
+                        result.reason = "'angular_pid.ki' set to %s" + param.value_to_string();
+                    }
+                }
+            }
+        }
+
+        // Parameter: angular_pid.kd
+        if( (param.get_name() == "angular_pid.kd" ) &&
+            (param.get_type() == rclcpp::PARAMETER_DOUBLE) )
+        {
+            float new_w_pid_kd = param.get_value<float>();
+            if(new_w_pid_kd < 0)
+            {
+                result.successful = false;
+                result.reason = "'angular_pid.kd' cannot be negative!";
+            }
+            else
+            {
+                RCLCPP_INFO(get_logger(), "Setting angular PID parameters.");
+                comm->set_w_pid(w_pid_kp, w_pid_ki, new_w_pid_kd);
+                if( comm->get_w_pid(w_pid_kp, w_pid_ki, w_pid_kd) == -1 )
+                    result.reason = "Unable to read angular PID parameters.";
+                else
+                {
+                    if(new_w_pid_kd != w_pid_kd)
+                        result.reason = "'angular_pid.kd' could not be set!";
+                    else
+                    {
+                        result.successful = true;
+                        result.reason = "'angular_pid.kd' set to %s" + param.value_to_string();
+                    }
+                }
+            }
+        }
     } // for each param in params
     return result;
 }

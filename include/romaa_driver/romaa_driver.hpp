@@ -41,6 +41,7 @@ class RoMAADriver : public rclcpp::Node
         bool enable_motor, reset_odom;
         float wheelbase, wheel_radius;
         float v_pid_kp, v_pid_ki, v_pid_kd;
+        float w_pid_kp, w_pid_ki, w_pid_kd;
 
         // Node variables
         romaa_comm *comm;
