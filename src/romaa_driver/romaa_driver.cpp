@@ -87,6 +87,8 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
         std::bind(&RoMAADriver::resetOdometrySrvCb, this, _1, _2));
     motor_srv = create_service<std_srvs::srv::SetBool>("enable_motor",
         std::bind(&RoMAADriver::enableMotorSrvCb, this, _1, _2));
+    set_odom_srv = create_service<romaa_driver_interfaces::srv::SetOdometry>("set_odometry",
+        std::bind(&RoMAADriver::setOdometrySrvCb, this, _1, _2));
 
     // Publisher timer
     pub_timer = create_wall_timer(std::chrono::duration<double>(1.0 / frequency),
@@ -187,6 +189,29 @@ void RoMAADriver::enableMotorSrvCb(const std::shared_ptr<std_srvs::srv::SetBool:
         comm->disable_motor();
         response->success = true;
         response->message = "Motor disabled.";
+    }
+}
+
+void RoMAADriver::setOdometrySrvCb(
+    const std::shared_ptr<romaa_driver_interfaces::srv::SetOdometry::Request> request,
+    std::shared_ptr<romaa_driver_interfaces::srv::SetOdometry::Response> response)
+{
+    RCLCPP_INFO(get_logger(), "Setting odometry to (%.2f, %.2f, %.2f)",
+        request->x, request->y, request->theta);
+    comm->set_odometry(request->x, request->y, request->theta);
+
+    float x_, y_, a_;
+    if( comm->get_odometry(x_, y_, a_) == -1 )
+    {
+        RCLCPP_INFO(get_logger(), "[set_odometry] Unable to read odometry!");
+    }
+    else
+    {
+        RCLCPP_INFO(get_logger(), "[set_odometry] Current odometry: (%.2f, %.2f, %.2f)", x_, y_, a_);
+        if( (request->x == x_) && (request->y == y_) && (request->theta == a_) )
+            response->success = true;
+        else
+            response->success = false;
     }
 }
 

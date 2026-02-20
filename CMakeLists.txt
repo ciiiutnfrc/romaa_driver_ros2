@@ -14,6 +14,7 @@ find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(romaa_driver_interfaces REQUIRED)
 
 set(dependencies
     rclcpp
@@ -22,6 +23,7 @@ set(dependencies
     tf2
     tf2_geometry_msgs
     tf2_ros
+    romaa_driver_interfaces
 )
 
 include_directories(include)
