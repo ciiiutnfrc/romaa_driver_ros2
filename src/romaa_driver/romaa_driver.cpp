@@ -17,6 +17,8 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     declare_parameter<std::string>("base_frame", "base_link");
     declare_parameter<bool>("enable_motor", false);
     declare_parameter<bool>("reset_odom", false);
+    declare_parameter<float>("kinematic.wheelbase", 0.45);
+    declare_parameter<float>("kinematic.wheel_radius", 0.075);
 
     // Reading parameters
     frequency = get_parameter("frequency").as_double();
@@ -26,6 +28,8 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     base_frame = get_parameter("base_frame").as_string();
     enable_motor = get_parameter("enable_motor").as_bool();
     reset_odom = get_parameter("reset_odom").as_bool();
+    wheelbase = static_cast<float>(get_parameter("kinematic.wheelbase").as_double());
+    wheel_radius = static_cast<float>(get_parameter("kinematic.wheel_radius").as_double());
 
     RCLCPP_INFO(get_logger(), "Driver node parameters ready.");
 
@@ -89,6 +93,10 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
         std::bind(&RoMAADriver::enableMotorSrvCb, this, _1, _2));
     set_odom_srv = create_service<romaa_driver_interfaces::srv::SetOdometry>("set_odometry",
         std::bind(&RoMAADriver::setOdometrySrvCb, this, _1, _2));
+
+    // Parameter callback.
+    param_cb_handle = add_on_set_parameters_callback(
+        std::bind(&RoMAADriver::parametersCb, this, _1));
 
     // Publisher timer
     pub_timer = create_wall_timer(std::chrono::duration<double>(1.0 / frequency),
@@ -213,6 +221,81 @@ void RoMAADriver::setOdometrySrvCb(
         else
             response->success = false;
     }
+}
+
+// Parameter callback
+rcl_interfaces::msg::SetParametersResult RoMAADriver::parametersCb(
+    const std::vector<rclcpp::Parameter> &params)
+{
+    rcl_interfaces::msg::SetParametersResult result;
+    for(const auto &param : params)
+    {
+        // Initialize result
+        result.successful = false;
+        result.reason = "";
+
+        // Debug.
+        RCLCPP_INFO(get_logger(), "name: %s", param.get_name().c_str());
+        RCLCPP_INFO(get_logger(), "type: %s", param.get_type_name().c_str());
+        RCLCPP_INFO(get_logger(), "value: %s", param.value_to_string().c_str());
+
+        // Parameter: kinematic.wheelbase
+        if( (param.get_name() == "kinematic.wheelbase" ) &&
+            (param.get_type() == rclcpp::PARAMETER_DOUBLE) )
+        {
+            float new_wheelbase = param.get_value<float>();
+            if(new_wheelbase < 0)
+                result.reason = "'kinematic.wheelbase' cannot be negative!";
+            else
+            {
+                RCLCPP_INFO(get_logger(), "Setting kinematic 'wheelbase' value.");
+                comm->set_kinematic_params(wheel_radius, new_wheelbase);
+                if( comm->get_kinematic_params(wheel_radius, wheelbase) == -1 )
+                    result.reason = "Unable to read kinematic parameters.";
+                else
+                {
+                    if(new_wheelbase != wheelbase)
+                        result.reason = "'kinematic.wheelbase' could not be set!";
+                    else
+                    {
+                        result.successful = true;
+                        result.reason = "'kinematic.wheelbase' set to %s" + param.value_to_string();
+                    }
+                }
+            }
+        }
+
+        // Parameter: kinematic.wheel_radius
+        if( (param.get_name() == "kinematic.wheel_radius" ) &&
+            (param.get_type() == rclcpp::PARAMETER_DOUBLE) )
+        {
+            float new_wheel_radius = param.get_value<float>();
+            if(new_wheel_radius < 0)
+            {
+                result.successful = false;
+                result.reason = "'kinematic.wheel_radius' cannot be negative!";
+            }
+            else
+            {
+                RCLCPP_INFO(get_logger(), "Setting kinematic 'wheel_radius' value.");
+                comm->set_kinematic_params(new_wheel_radius, wheelbase);
+                if( comm->get_kinematic_params(wheel_radius, wheelbase) == -1 )
+                    result.reason = "Unable to read kinematic parameters.";
+                else
+                {
+                    if(new_wheel_radius != wheel_radius)
+                        result.reason = "'kinematic.wheel_radius' could not be set!";
+                    else
+                    {
+                        result.successful = true;
+                        result.reason = "'kinematic.wheel_radius' set to %s" + param.value_to_string();
+                    }
+                }
+            }
+        }
+
+    } // for each param in params
+    return result;
 }
 
 } // namespace 'romaa_driver'
