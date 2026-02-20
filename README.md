@@ -20,3 +20,9 @@ Nodo driver para el controlador embebido de tracción del robot móvil RoMAA-II.
 - `base_frame` (`string`, default: `base_link`): nombre del frame del robot.
 - `enable_motor` (`bool`, default: `false`): inidica habilitar los motores al inicio de la ejecución.
 - `reset_odom` (`bool`, default: `false`): indica resetear la odometría al inicio de la ejecución.
+
+### Servicios
+- `reset` (`std_srvs/srv/Empty`): reinicia el controlador embebido.
+- `reset_odometry` (`std_srvs/srv/Empty`): reinicia la odometría fijando el valor de pose a (0, 0, 0).
+- `enable_motor` (`std_srvs/srv/SetBool`): habilita/deshabilita los motores de tracción del controlador embebido.
+- `set_odometry` (`romaa_driver_interfaces/srv/SetOdometry`): modifica el valor de odometría (x, y, theta).

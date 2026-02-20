@@ -13,6 +13,11 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "tf2_ros/transform_broadcaster.hpp"
 
+// Service messages
+#include "std_srvs/srv/empty.hpp"
+#include "std_srvs/srv/set_bool.hpp"
+#include "romaa_driver_interfaces/srv/set_odometry.hpp"
+
 // RoMAA communication class
 #include "romaa_comm/romaa_comm.h"
 
@@ -54,6 +59,22 @@ class RoMAADriver : public rclcpp::Node
         // Timer
         rclcpp::TimerBase::SharedPtr pub_timer;
         void pubOdometryTFCb();
+
+        // Service servers
+        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_srv;
+        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_odom_srv;
+        rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr motor_srv;
+        rclcpp::Service<romaa_driver_interfaces::srv::SetOdometry>::SharedPtr set_odom_srv;
+
+        // Service server callbacks
+        void resetSrvCb(const std::shared_ptr<std_srvs::srv::Empty::Request> ,
+            std::shared_ptr<std_srvs::srv::Empty::Response> );
+        void resetOdometrySrvCb(const std::shared_ptr<std_srvs::srv::Empty::Request> ,
+            std::shared_ptr<std_srvs::srv::Empty::Response> );
+        void enableMotorSrvCb(const std::shared_ptr<std_srvs::srv::SetBool::Request> ,
+            std::shared_ptr<std_srvs::srv::SetBool::Response> );
+        void setOdometrySrvCb(const std::shared_ptr<romaa_driver_interfaces::srv::SetOdometry::Request> ,
+            std::shared_ptr<romaa_driver_interfaces::srv::SetOdometry::Response> );
 };
 
 } // namespace 'romaa_driver'
