@@ -19,6 +19,9 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     declare_parameter<bool>("reset_odom", false);
     declare_parameter<float>("kinematic.wheelbase", 0.45);
     declare_parameter<float>("kinematic.wheel_radius", 0.075);
+    declare_parameter<float>("linear_pid.kp", 1800.0);
+    declare_parameter<float>("linear_pid.ki", 100.0);
+    declare_parameter<float>("linear_pid.kd", 10.0);
 
     // Reading parameters
     frequency = get_parameter("frequency").as_double();
@@ -30,6 +33,9 @@ RoMAADriver::RoMAADriver() : Node("romaa_driver")
     reset_odom = get_parameter("reset_odom").as_bool();
     wheelbase = static_cast<float>(get_parameter("kinematic.wheelbase").as_double());
     wheel_radius = static_cast<float>(get_parameter("kinematic.wheel_radius").as_double());
+    v_pid_kp = static_cast<float>(get_parameter("linear_pid.kp").as_double());
+    v_pid_ki = static_cast<float>(get_parameter("linear_pid.ki").as_double());
+    v_pid_kd = static_cast<float>(get_parameter("linear_pid.kd").as_double());
 
     RCLCPP_INFO(get_logger(), "Driver node parameters ready.");
 
@@ -289,6 +295,93 @@ rcl_interfaces::msg::SetParametersResult RoMAADriver::parametersCb(
                     {
                         result.successful = true;
                         result.reason = "'kinematic.wheel_radius' set to %s" + param.value_to_string();
+                    }
+                }
+            }
+        }
+
+        // Parameter: linear_pid.kp
+        if( (param.get_name() == "linear_pid.kp" ) &&
+            (param.get_type() == rclcpp::PARAMETER_DOUBLE) )
+        {
+            float new_v_pid_kp = param.get_value<float>();
+            if(new_v_pid_kp < 0)
+            {
+                result.successful = false;
+                result.reason = "'linear_pid.kp' cannot be negative!";
+            }
+            else
+            {
+                RCLCPP_INFO(get_logger(), "Setting linear PID parameters.");
+                comm->set_v_pid(new_v_pid_kp, v_pid_ki, v_pid_kd);
+                if( comm->get_v_pid(v_pid_kp, v_pid_ki, v_pid_kd) == -1 )
+                    result.reason = "Unable to read linear PID parameters.";
+                else
+                {
+                    if(new_v_pid_kp != v_pid_kp)
+                        result.reason = "'linear_pid.kp' could not be set!";
+                    else
+                    {
+                        result.successful = true;
+                        result.reason = "'linear_pid.kp' set to %s" + param.value_to_string();
+                    }
+                }
+            }
+        }
+
+        // Parameter: linear_pid.ki
+        if( (param.get_name() == "linear_pid.ki" ) &&
+            (param.get_type() == rclcpp::PARAMETER_DOUBLE) )
+        {
+            float new_v_pid_ki = param.get_value<float>();
+            if(new_v_pid_ki < 0)
+            {
+                result.successful = false;
+                result.reason = "'linear_pid.ki' cannot be negative!";
+            }
+            else
+            {
+                RCLCPP_INFO(get_logger(), "Setting linear PID parameters.");
+                comm->set_v_pid(v_pid_kp, new_v_pid_ki, v_pid_kd);
+                if( comm->get_v_pid(v_pid_kp, v_pid_ki, v_pid_kd) == -1 )
+                    result.reason = "Unable to read linear PID parameters.";
+                else
+                {
+                    if(new_v_pid_ki != v_pid_ki)
+                        result.reason = "'linear_pid.ki' could not be set!";
+                    else
+                    {
+                        result.successful = true;
+                        result.reason = "'linear_pid.ki' set to %s" + param.value_to_string();
+                    }
+                }
+            }
+        }
+
+        // Parameter: linear_pid.kd
+        if( (param.get_name() == "linear_pid.kd" ) &&
+            (param.get_type() == rclcpp::PARAMETER_DOUBLE) )
+        {
+            float new_v_pid_kd = param.get_value<float>();
+            if(new_v_pid_kd < 0)
+            {
+                result.successful = false;
+                result.reason = "'linear_pid.kd' cannot be negative!";
+            }
+            else
+            {
+                RCLCPP_INFO(get_logger(), "Setting linear PID parameters.");
+                comm->set_v_pid(v_pid_kp, v_pid_ki, new_v_pid_kd);
+                if( comm->get_v_pid(v_pid_kp, v_pid_ki, v_pid_kd) == -1 )
+                    result.reason = "Unable to read linear PID parameters.";
+                else
+                {
+                    if(new_v_pid_kd != v_pid_kd)
+                        result.reason = "'linear_pid.kd' could not be set!";
+                    else
+                    {
+                        result.successful = true;
+                        result.reason = "'linear_pid.kd' set to %s" + param.value_to_string();
                     }
                 }
             }

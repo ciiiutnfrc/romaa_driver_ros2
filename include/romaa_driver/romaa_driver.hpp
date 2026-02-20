@@ -40,6 +40,7 @@ class RoMAADriver : public rclcpp::Node
         std::string odom_frame, base_frame; // TF frame names
         bool enable_motor, reset_odom;
         float wheelbase, wheel_radius;
+        float v_pid_kp, v_pid_ki, v_pid_kd;
 
         // Node variables
         romaa_comm *comm;
