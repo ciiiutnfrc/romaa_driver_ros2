@@ -4,6 +4,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "rcl_interfaces/msg/parameter_descriptor.hpp"
 
 // Messages
 #include "nav_msgs/msg/odometry.hpp"

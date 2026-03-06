@@ -10,13 +10,37 @@ using std::placeholders::_2;
 RoMAADriver::RoMAADriver() : Node("romaa_driver")
 {
     // Declare node paremeters
-    declare_parameter<double>("frequency", 10.0);
-    declare_parameter<std::string>("port", "/dev/ttyUSB0");
-    declare_parameter<int>("baudrate", 115200);
-    declare_parameter<std::string>("odom_frame", "odom");
-    declare_parameter<std::string>("base_frame", "base_link");
-    declare_parameter<bool>("enable_motor", false);
-    declare_parameter<bool>("reset_odom", false);
+    auto param_desc = rcl_interfaces::msg::ParameterDescriptor();
+
+    //declare_parameter<double>("frequency", 10.0);
+    param_desc.description = "Node publication frequency";
+    param_desc.read_only = true;
+    declare_parameter<double>("frequency", 10.0, param_desc);
+
+    param_desc.description = "Communication device file";
+    param_desc.read_only = true;
+    declare_parameter<std::string>("port", "/dev/ttyUSB0", param_desc);
+
+    param_desc.description = "Communication speed";
+    param_desc.read_only = true;
+    declare_parameter<int>("baudrate", 115200, param_desc);
+
+    param_desc.description = "Name of the odometry frame";
+    param_desc.read_only = true;
+    declare_parameter<std::string>("odom_frame", "odom", param_desc);
+
+    param_desc.description = "Name of the robot frame";
+    param_desc.read_only = true;
+    declare_parameter<std::string>("base_frame", "base_link", param_desc);
+
+    param_desc.description = "Enabling motors at the startup";
+    param_desc.read_only = true;
+    declare_parameter<bool>("enable_motor", false, param_desc);
+
+    param_desc.description = "Resetting odometry at the start";
+    param_desc.read_only = true;
+    declare_parameter<bool>("reset_odom", false, param_desc);
+
     declare_parameter<float>("kinematic.wheelbase", 0.45);
     declare_parameter<float>("kinematic.wheel_radius", 0.075);
     declare_parameter<float>("linear_pid.kp", 1800.0);
