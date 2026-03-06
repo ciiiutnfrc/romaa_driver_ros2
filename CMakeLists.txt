@@ -8,6 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rcl_interfaces REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
@@ -18,6 +19,7 @@ find_package(romaa_driver_interfaces REQUIRED)
 
 set(dependencies
     rclcpp
+    rcl_interfaces
     nav_msgs
     std_srvs
     tf2
@@ -42,6 +44,11 @@ install(TARGETS
 
 install(DIRECTORY
     launch
+    DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+    config
     DESTINATION share/${PROJECT_NAME}
 )
 

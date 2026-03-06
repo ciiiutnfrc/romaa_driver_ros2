@@ -4,6 +4,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "rcl_interfaces/msg/parameter_descriptor.hpp"
 
 // Messages
 #include "nav_msgs/msg/odometry.hpp"
@@ -17,6 +18,9 @@
 #include "std_srvs/srv/empty.hpp"
 #include "std_srvs/srv/set_bool.hpp"
 #include "romaa_driver_interfaces/srv/set_odometry.hpp"
+
+// Parameter callback return message.
+#include "rcl_interfaces/msg/set_parameters_result.hpp"
 
 // RoMAA communication class
 #include "romaa_comm/romaa_comm.h"
@@ -36,6 +40,9 @@ class RoMAADriver : public rclcpp::Node
         int baudrate;                       // Serial port baudrate
         std::string odom_frame, base_frame; // TF frame names
         bool enable_motor, reset_odom;
+        float wheelbase, wheel_radius;
+        float v_pid_kp, v_pid_ki, v_pid_kd;
+        float w_pid_kp, w_pid_ki, w_pid_kd;
 
         // Node variables
         romaa_comm *comm;
@@ -75,6 +82,12 @@ class RoMAADriver : public rclcpp::Node
             std::shared_ptr<std_srvs::srv::SetBool::Response> );
         void setOdometrySrvCb(const std::shared_ptr<romaa_driver_interfaces::srv::SetOdometry::Request> ,
             std::shared_ptr<romaa_driver_interfaces::srv::SetOdometry::Response> );
+
+        // Parameter callback.
+        OnSetParametersCallbackHandle::SharedPtr param_cb_handle;
+        rcl_interfaces::msg::SetParametersResult parametersCb(
+            const std::vector<rclcpp::Parameter> & );
+
 };
 
 } // namespace 'romaa_driver'

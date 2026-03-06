@@ -1,0 +1,26 @@
+romaa_driver:
+  ros__parameters:
+    frequency: 10.0
+    # Communication port
+    port: "/dev/ttyUSB0"
+    baudrate: 115200
+    # Frame names
+    odom_frame: "odom"
+    base_frame: "base_link"
+    # Flags
+    reset_odom: False
+    enable_motor: False
+    # Kinematic parameters
+    kinematic:
+      wheelbase: 0.45
+      wheel_radius: 0.075
+    # Linear speed PID constants
+    linear_pid:
+      kp: 1800.00
+      ki: 100.0
+      kd: 10.0
+    # Angular speed PID constants
+    angular_pid:
+      kp: 1500.0
+      ki: 50.0
+      kd: 20.0

@@ -18,8 +18,18 @@ Nodo driver para el controlador embebido de tracción del robot móvil RoMAA-II.
 - `baudrate` (`int`, default: `115200`): velocidad de la comunicación.
 - `odom_frame` (`string`, default: `odom`): nombre del frame de odometría.
 - `base_frame` (`string`, default: `base_link`): nombre del frame del robot.
-- `enable_motor` (`bool`, default: `false`): inidica habilitar los motores al inicio de la ejecución.
+- `enable_motor` (`bool`, default: `false`): indica habilitar los motores al inicio de la ejecución.
 - `reset_odom` (`bool`, default: `false`): indica resetear la odometría al inicio de la ejecución.
+
+### Parámetros dinámicos
+- `kinematic.wheelbase` (`float`): distancia entre ruedas en [m].
+- `kinematic.wheel_radius` (`float`): radio de las ruedas en [m].
+- `linear_pid.kp` (`float`): constante Kp del PID de velocidad lineal.
+- `linear_pid.ki` (`float`): constante Ki del PID de velocidad lineal.
+- `linear_pid.kd` (`float`): constante Kd del PID de velocidad lineal.
+- `angular_pid.kp` (`float`): constante Kp del PID de velocidad angular.
+- `angular_pid.ki` (`float`): constante Ki del PID de velocidad angular.
+- `angular_pid.kd` (`float`): constante Kd del PID de velocidad angular.
 
 ### Servicios
 - `reset` (`std_srvs/srv/Empty`): reinicia el controlador embebido.
