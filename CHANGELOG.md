@@ -4,6 +4,14 @@ Todos los cambios significativos van a aparecer en este archivo.
 
 El formato usado está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) y este proyecto adhiere al [Versionado Semántico](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-06
+- Update `README.md`
+- Add YAML configuration file for node params
+- Define static parameters of the driver node
+- Add dynamic params for angular speed PID consts
+- Add dynamic params for linear speed PID consts
+- Add node dynamic params for the robot kinematics
+
 ## [0.3.0] - 2026-02-19
 - Update `README.md`
 - Add service to set the odometry value
